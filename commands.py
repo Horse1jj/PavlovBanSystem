@@ -326,5 +326,104 @@ async def setup_commands(bot, servers, api_url, access_token):
         else:
             await interaction.response.send_message(f"Failed to {'set' if pin else 'remove'} server pin on {server_name}.", ephemeral=True)
 
+    # Additional commands
+    @bot.tree.command(name="ban", description="Ban a player from the server")
+    @app_commands.describe(server_name="The name of the server", player_name="The name of the player to ban")
+    async def Ban(interaction: discord.Interaction, server_name: str, player_name: str):
+        await log_command(interaction, "ban", {"server_name": server_name, "player_name": player_name})
 
+        if not has_required_role(interaction.user, required_roles):
+            await interaction.response.send_message("You do not have the required role to use this command.", ephemeral=True)
+            return
+
+        server_details = get_server_details(server_name, servers)
+        if not server_details:
+            await interaction.response.send_message(f"Server '{server_name}' not found.", ephemeral=True)
+            return
+
+        ban_command = f"Ban {player_name}"
+        response = await send_pavlov_command(server_details['ip'], server_details['port'], server_details['password'], ban_command)
+        if response:
+            await interaction.response.send_message(f"Player {player_name} banned from {server_name}.\nResponse: {response}", ephemeral=True)
+        else:
+            await interaction.response.send_message(f"Failed to ban player {player_name} from {server_name}.", ephemeral=True)
+
+    @bot.tree.command(name="unban", description="Unban a player from the server")
+    @app_commands.describe(server_name="The name of the server", player_name="The name of the player to unban")
+    async def Unban(interaction: discord.Interaction, server_name: str, player_name: str):
+        await log_command(interaction, "unban", {"server_name": server_name, "player_name": player_name})
+
+        if not has_required_role(interaction.user, required_roles):
+            await interaction.response.send_message("You do not have the required role to use this command.", ephemeral=True)
+            return
+
+        server_details = get_server_details(server_name, servers)
+        if not server_details:
+            await interaction.response.send_message(f"Server '{server_name}' not found.", ephemeral=True)
+            return
+
+        unban_command = f"Unban {player_name}"
+        response = await send_pavlov_command(server_details['ip'], server_details['port'], server_details['password'], unban_command)
+        if response:
+            await interaction.response.send_message(f"Player {player_name} unbanned on {server_name}.\nResponse: {response}", ephemeral=True)
+        else:
+            await interaction.response.send_message(f"Failed to unban player {player_name} on {server_name}.", ephemeral=True)
+
+    @bot.tree.command(name="GiveRCONplus", description="Gives RCON plus menu")
+    @app_commands.describe(server_name="The name of the server", username="the username")
+    async def GiveRCONplus(interaction: discord.Interaction, server_name: str, username: str):
+        await log_command(interaction, "GiveRCONplus", {"server_name": server_name, "username": username})
+
+        if not has_required_role(interaction.user, required_roles):
+            await interaction.response.send_message("You do not have the required role to use this command.", ephemeral=True)
+            return
+
+        server_details = get_server_details(server_name, servers)
+        if not server_details:
+            await interaction.response.send_message(f"Server '{server_name}' not found.", ephemeral=True)
+            return
+
+        setpin_command = f"GiveMenu {username}"
+        response = await send_pavlov_command(server_details['ip'], server_details['port'], server_details['password'], setpin_command)
+        if response:
+            await interaction.response.send_message(f"RCON plus  Given to {usermame} on {server_name}.\nResponse: {response}", ephemeral=True)
+        else:
+            await interaction.response.send_message(f"Failed to give RCON on {server_name}.", ephemeral=True)
+
+    @bot.tree.command(name="setmaxplayers", description="Set the maximum number of players on the server")
+    @app_commands.describe(server_name="The name of the server", max_players="The maximum number of players")
+    async def SetMaxPlayers(interaction: discord.Interaction, server_name: str, max_players: int):
+        await log_command(interaction, "setmaxplayers", {"server_name": server_name, "max_players": max_players})
+
+        if not has_required_role(interaction.user, required_roles):
+            await interaction.response.send_message("You do not have the required role to use this command.", ephemeral=True)
+            return
+
+        server_details = get_server_details(server_name, servers)
+        if not server_details:
+            await interaction.response.send_message(f"Server '{server_name}' not found.", ephemeral=True)
+            return
+
+        setmaxplayers_command = f"SetMaxPlayers {max_players}"
+        response = await send_pavlov_command(server_details['ip'], server_details['port'], server_details['password'], setmaxplayers_command)
+        if response:
+            await interaction.response.send_message(f"Maximum players set to {max_players} on {server_name}.\nResponse: {response}", ephemeral=True)
+        else:
+            await interaction.response.send_message(f"Failed to set max players on {server_name}.", ephemeral=True)
+
+    @bot.tree.command(name="addmod", description="Add a moderator to the server")
+    @app_commands.describe(server_name="The name of the server", player_name="The name of the player to add as moderator")
+    async def AddMod(interaction: discord.Interaction, server_name: str, player_name: str):
+        await log_command(interaction, "addmod", {"server_name": server_name, "player_name": player_name})
+
+        server_details = get_server_details(server_name, servers)
+        if not server_details:
+            await interaction.response.send_message(f"Server '{server_name}' not found.", ephemeral=True)
+            return
+
+        addmod_command = f"AddMod {player_name}"
+        response = await send_pavlov_command(server_details['ip'], server_details['port'], server_details['password'], addmod_command)
+        await interaction.response.send_message(f"Response: {response}", ephemeral=True)
+
+    
 
