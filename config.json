@@ -1,12 +1,13 @@
 {
   "discord_bot_token": "token",
-  "allowed_channel_id": channel_id_for_Bans,
-  "github_username": "github_username",
-  "repo_name": "repo_name",
-  "file_path": "ban_file",
-  "access_token": "github_token",
-  "required_roles": ["Admin", "Moderator"],
+  "allowed_channel_id": channel,
+  "github_username": "git user",
+  "repo_name": "repo",
+  "file_path": "file",
+  "access_token": "token",
+  "required_roles": ["Admin", "Moderator", "Owners"],
   "bot_version": "1.0.0",
   "bot_status": "Version",
-  "log_channel_id": log channel id
+  "log_channel_id": 1261874227938726002,
+  "default_role_id": 1261873330345218079
 }
