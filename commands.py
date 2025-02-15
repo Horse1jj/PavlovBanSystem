@@ -234,5 +234,97 @@ async def setup_commands(bot, servers, api_url, access_token):
         embed.add_field(name="/banlist", value="Get the ban list for a server. No required role", inline=False)
         embed.add_field(name="/checkunban", value="Check unban time for a specific user. No required role", inline=False)
         embed.add_field(name="/debug", value="DONT USE UNLESS NEEDED MAY BREAK BOT. Required role: Admin, Moderator", inline=False)
+        embed.add_field(name="/addmod", value="Add a player to the moderator list. Required role: Admin", inline=False)
+        embed.add_field(name="/removemod", value="Remove a player from the moderator list. Required role: Admin", inline=False)
+        embed.add_field(name="/ban", value="Ban a player from the server. Required role: Admin", inline=False)
+        embed.add_field(name="/unban", value="Unban a player from the server. Required role: Admin", inline=False)
+        embed.add_field(name="/setpin", value="Set or remove the server pin. Required role: Admin", inline=False)
+        embed.add_field(name="/setmaxplayers", value="Set the maximum number of players on the server. Required role: Admin", inline=False)
+        embed.add_field(name="/settimeLimit", value="Set the time limit for the current match. Required role: Admin", inline=False)
+        embed.add_field(name="/setcash", value="Set the cash of a player. Required role: Admin", inline=False)
+        embed.add_field(name="/givecash", value="Give cash to a player. Required role: Admin", inline=False)
+        embed.add_field(name="/giveteamcash", value="Give cash to all players on a team. Required role: Admin", inline=False)
+        embed.add_field(name="/slap", value="Deal damage to a player. Required role: Admin", inline=False)
+        embed.add_field(name="/kill", value="Kill a player. Required role: Admin", inline=False)
+        embed.add_field(name="/switchteam", value="Switch a player to another team. Required role: Admin", inline=False)
+        embed.add_field(name="/teleport", value="Teleport a player to another player. Required role: Admin", inline=False)
+        embed.add_field(name="/setplayerskin", value="Set the skin of a player. Required role: Admin", inline=False)
+        embed.add_field(name="/setbalancetableurl", value="Set the balance table URL. Required role: Admin", inline=False)
+        embed.add_field(name="/setlimitedammotype", value="Set the limited ammo type. Required role: Admin", inline=False)
+        embed.add_field(name="/enablecompmode", value="Enable or disable competitive mode. Required role: Admin", inline=False)
+        embed.add_field(name="/enableverboselogging", value="Enable or disable verbose logging. Required role: Admin", inline=False)
+        embed.add_field(name="/enablewhitelist", value="Enable or disable whitelist usage. Required role: Admin", inline=False)
+        embed.add_field(name="/showNametags", value="Enable or disable name tags above friendly players. Required role: Admin", inline=False)
+        embed.add_field(name="/shutdownserver", value="Shutdown the server. Required role: Admin", inline=False)
+        embed.add_field(name="/resetSND", value="Reset the currently running SND match. Required role: Admin", inline=False)
+        embed.add_field(name="/pausematch", value="Pause the currently running match. Required role: Admin", inline=False)
+        embed.add_field(name="/switchmap", value="Switch to a specific map and game mode. Required role: Admin", inline=False)
+        embed.add_field(name="/addmaprotation", value="Add a map to the map rotation. Required role: Admin", inline=False)
+        embed.add_field(name="/removemaprotation", value="Remove a map from the map rotation. Required role: Admin", inline=False)
+        embed.add_field(name="/maplist", value="Get the current map rotation. Required role: Admin", inline=False)
+        embed.add_field(name="/itemlist", value="List all items in the game. Required role: Admin", inline=False)
+        embed.add_field(name="/inspectplayer", value="Get detailed status of a player. Required role: Admin", inline=False)
+        embed.add_field(name="/inspectteam", value="Get detailed status of a team. Required role: Admin", inline=False)
+        embed.add_field(name="/inspectall", value="Get detailed status of all players. Required role: Admin", inline=False)
+        embed.add_field(name="/clearemptyvehicles", value="Clear all empty vehicles. Required role: Admin", inline=False)
+        embed.add_field(name="/disconnect", value="Force the server to close the RCON connection. Required role: Admin", inline=False)
+        embed.add_field(name="/updateservername", value="Update the server name. Required role: Admin", inline=False)
+        embed.add_field(name="/ugcaddmod", value="Add a mod to the server. Required role: Admin", inline=False)
+        embed.add_field(name="/ugcremovemod", value="Remove a mod from the server. Required role: Admin", inline=False)
+        embed.add_field(name="/ugcclearmodlist", value="Clear all mods from the server. Required role: Admin", inline=False)
+        embed.add_field(name="/ugcmodlist", value="List all mods on the server. Required role: Admin", inline=False)
+        embed.add_field(name="/tttendround", value="End the TTT round. Required role: Admin", inline=False)
+        embed.add_field(name="/tttflushkarma", value="Reset the karma of all players. Required role: Admin", inline=False)
+        embed.add_field(name="/tttgivecredits", value="Give TTT credits to a player. Required role: Admin", inline=False)
+        embed.add_field(name="/tttpausetimer", value="Pause the TTT timer. Required role: Admin", inline=False)
+        embed.add_field(name="/tttsetkarma", value="Set the karma of a player. Required role: Admin", inline=False)
+        embed.add_field(name="/tttsetrole", value="Set the TTT role of a player. Required role: Admin", inline=False)
+        embed.add_field(name="/tttalwaysenableskinmenu", value="Enable or disable the TTT skin menu mid-round. Required role: Admin", inline=False)
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
+
+    @bot.tree.command(name="addmod", description="Add a player to the moderator list")
+    @app_commands.describe(server_name="The name of the server", unique_id="The unique ID of the player")
+    async def addmod(interaction: discord.Interaction, server_name: str, unique_id: str):
+        await log_command(interaction, "addmod", {"server_name": server_name, "unique_id": unique_id})
+
+        if not has_required_role(interaction.user, required_roles):
+            await interaction.response.send_message("You do not have the required role to use this command.", ephemeral=True)
+            return
+
+        server_details = get_server_details(server_name, servers)
+        if not server_details:
+            await interaction.response.send_message(f"Server '{server_name}' not found.", ephemeral=True)
+            return
+
+        addmod_command = f"AddMod {unique_id}"
+        response = await send_pavlov_command(server_details['ip'], server_details['port'], server_details['password'], addmod_command)
+        if response:
+            await interaction.response.send_message(f"Player {unique_id} added to moderator list on {server_name}.\nResponse: {response}", ephemeral=True)
+        else:
+            await interaction.response.send_message(f"Failed to add player {unique_id} to moderator list on {server_name}.", ephemeral=True)
+
+
+    @bot.tree.command(name="setpin", description="Set or remove the server pin")
+    @app_commands.describe(server_name="The name of the server", pin="The pin number (optional)")
+    async def setpin(interaction: discord.Interaction, server_name: str, pin: str = None):
+        await log_command(interaction, "setpin", {"server_name": server_name, "pin": pin})
+
+        if not has_required_role(interaction.user, required_roles):
+            await interaction.response.send_message("You do not have the required role to use this command.", ephemeral=True)
+            return
+
+        server_details = get_server_details(server_name, servers)
+        if not server_details:
+            await interaction.response.send_message(f"Server '{server_name}' not found.", ephemeral=True)
+            return
+
+        setpin_command = f"SetPin {pin}" if pin else "SetPin"
+        response = await send_pavlov_command(server_details['ip'], server_details['port'], server_details['password'], setpin_command)
+        if response:
+            await interaction.response.send_message(f"Server pin {'set' if pin else 'removed'} on {server_name}.\nResponse: {response}", ephemeral=True)
+        else:
+            await interaction.response.send_message(f"Failed to {'set' if pin else 'remove'} server pin on {server_name}.", ephemeral=True)
+
+
+
